@@ -10,7 +10,11 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type"],
+}));
 app.use(express.json());
 
 const upload = multer({
@@ -34,6 +38,13 @@ app.post("/upload", upload.single("file"), async (req: Request, res: Response) =
         return res.status(400).json({ error: "No file uploaded" });
         }
 
+        // Validate MIME type
+        const allowedTypes = ["image/png", "image/jpeg", "image/jpg", "application/pdf"];
+        if (!allowedTypes.includes(file.mimetype)) {
+            return res.status(400).json({ error: "Unsupported file type. Only PNG, JPG, and PDF allowed." });
+        }
+
+
         const blob = new Blob([new Uint8Array(file.buffer)], { type: file.mimetype });
 
         const result = await pinata.upload.public.file(
@@ -53,7 +64,7 @@ app.post("/upload", upload.single("file"), async (req: Request, res: Response) =
             url: `https://${process.env.PINATA_GATEWAY}/ipfs/${result.cid}`,
         });
     } catch (error) {
-        console.error(error);
+        console.error("Upload error:", error);
         res.status(500).json({ error: "File upload failed" });
     }
 });

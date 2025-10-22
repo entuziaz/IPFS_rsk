@@ -12,6 +12,8 @@ function App() {
       ? (size / 1024).toFixed(2) + " KB"
       : (size / (1024 * 1024)).toFixed(2) + " MB";
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const handleUpload = async () => {
     if (!file) return;
 
@@ -23,7 +25,7 @@ function App() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await fetch("http://localhost:4000/upload", {
+      const res = await fetch(`${API_URL}/upload`, {
         method: "POST",
         body: formData,
       });
