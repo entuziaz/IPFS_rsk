@@ -39,10 +39,11 @@ npm run dev
 ## Server
 Made with Node.js and Express. Handles file uploads to Pinata.
 
-**Tech Stack:** Node.js + Express + Multa + PinataSDK + TypeScript
+**Tech Stack:** Node.js + Express + Pinata SDK + Multer (multipart parser) + TypeScript
 
 ### Features
-- TBD
+- File validation: MIME type + max size (2MB)
+- Upload file buffer via Pinata SDK
 
 ### Environment Variables (`server/.env`)
 PINATA_JWT=your_pinata_jwt
@@ -55,3 +56,27 @@ cd server
 npm install
 npx ts-node src/app.ts
 
+
+## Contracts
+Made with Solidity and deployed on Rootstock Testnet. Allows paying for uploads.
+
+**Tech Stack:** Solidity + Hardhat 
+
+### Environment Variables (`server/.env`)
+PINATA_JWT=your_pinata_jwt
+
+# Running Commands
+npx hardhat compile
+npx hardhat run scripts/deploy.ts --network rootstock_testnet
+
+You can verify contracts by following the instructions
+in the [Rootstock docs](https://dev.rootstock.io/developers/quickstart/remix/#verifying-the-contract-on-rootstock-explorer).
+
+### Project Status
+**End-to-end workflow working:**
+- ✅ Select file on UI
+- ✅ Pay on-chain 
+- ✅ Confirm tx 
+- ✅ Upload to IPFS 
+- ✅ Receive CID 
+- ✅ View file on gateway 
