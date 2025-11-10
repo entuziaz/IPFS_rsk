@@ -7,9 +7,9 @@ The goal is to demonstrate how **Rootstock** can enable BTC-backed payments whil
 ### TODO
 - [x] Setup React client to accept file
 - [x] Connect to IPFS-Pinata upload SDK  
-- [ ] Add Node.js API for IPFS + payment verification  
-- [ ] Connect to Rootstock for BTC-backed payments
-- [ ] Add wallet connection (e.g., MetaMask) 
+- [x] Add Node.js API for IPFS + payment verification  
+- [x] Connect to Rootstock for BTC-backed payments
+- [x] Add wallet connection (e.g., MetaMask) 
 
 ## Client
 Made with React. Lets users select a file, preview its metadata (name, size, MIME type), and prepare for upload to IPFS.
@@ -23,6 +23,9 @@ Made with React. Lets users select a file, preview its metadata (name, size, MIM
 
 ### Environment Variables (`client/.env`)
 VITE_API_URL=your_server_url
+VITE_CONTRACT_ADDRESS=deployed_and_verified_contract_address
+VITE_UPLOAD_PRICE=0.001
+
 
 ### How to run
 ```bash
