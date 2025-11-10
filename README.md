@@ -22,19 +22,23 @@ Made with React. Lets users select a file, preview its metadata (name, size, MIM
 - Disabled upload button until valid file chosen
 
 ### Environment Variables (`client/.env`)
+```bash
 VITE_API_URL=your_server_url
 VITE_CONTRACT_ADDRESS=deployed_and_verified_contract_address
 VITE_UPLOAD_PRICE=0.001
-
+```
 
 ### How to run
+
+
+**Install dependencies**
 ```bash
-# Install dependencies
 npm install
-
-# Run development server
+```
+**Run development server**
+```bash
 npm run dev
-
+```
 
 ## Server
 Made with Node.js and Express. Handles file uploads to Pinata.
@@ -46,16 +50,19 @@ Made with Node.js and Express. Handles file uploads to Pinata.
 - Upload file buffer via Pinata SDK
 
 ### Environment Variables (`server/.env`)
+```bash
 PINATA_JWT=your_pinata_jwt
 PINATA_GATEWAY=your_gateway_url
 FRONTEND_URL=your_client_url
 PORT=4000
+```
 
 ### Run Server
+```bash
 cd server
 npm install
 npx ts-node src/app.ts
-
+```
 
 ## Contracts
 Made with Solidity and deployed on Rootstock Testnet. Allows paying for uploads.
@@ -63,17 +70,21 @@ Made with Solidity and deployed on Rootstock Testnet. Allows paying for uploads.
 **Tech Stack:** Solidity + Hardhat 
 
 ### Environment Variables (`server/.env`)
+```bash
 PINATA_JWT=your_pinata_jwt
+```
 
 # Running Commands
+```bash
 npx hardhat compile
 npx hardhat run scripts/deploy.ts --network rootstock_testnet
+```
 
-You can verify contracts by following the instructions
+> You can verify contracts by following the instructions
 in the [Rootstock docs](https://dev.rootstock.io/developers/quickstart/remix/#verifying-the-contract-on-rootstock-explorer).
 
 ### Project Status
-**End-to-end workflow working:**
+End-to-end workflow working:
 - ✅ Select file on UI
 - ✅ Pay on-chain 
 - ✅ Confirm tx 
