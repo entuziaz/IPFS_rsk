@@ -11,34 +11,35 @@ The goal is to demonstrate how **Rootstock** can enable BTC-backed payments whil
 - [x] Connect to Rootstock for BTC-backed payments
 - [x] Add wallet connection (e.g., MetaMask) 
 
-## Client
-Made with React. Lets users select a file, preview its metadata (name, size, MIME type), and prepare for upload to IPFS.
 
-**Tech Stack:** React + Vite + TypeScript
+## Contracts
+Made with Solidity and deployed on Rootstock Testnet. Allows paying for uploads.
+
+**Tech Stack:** Solidity + Hardhat 
 
 ### Features
-- File input with preview
-- File size validation (max 2 MB)
-- Disabled upload button until valid file chosen
+- Accept payments for uploads
+- Owner-only withdrawal
 
-### Environment Variables (`client/.env`)
+### Environment Variables (`contracts/.env`)
 ```bash
-VITE_API_URL=your_server_url
-VITE_CONTRACT_ADDRESS=deployed_and_verified_contract_address
-VITE_UPLOAD_PRICE=0.001
+PRIVATE_KEY=Your_PRIVATE_KEY
 ```
 
-### How to run
+### Running Commands
 
+To compile the contract:
+```bash
+npx hardhat compile
+```
+To deploy the contract to the testnet:
+```bash
+npx hardhat run scripts/deploy.ts --network rootstock_testnet
+```
 
-**Install dependencies**
-```bash
-npm install
-```
-**Run development server**
-```bash
-npm run dev
-```
+> You can verify contracts by following the instructions
+in the [Rootstock docs](https://dev.rootstock.io/developers/quickstart/remix/#verifying-the-contract-on-rootstock-explorer).
+
 
 ## Server
 Made with Node.js and Express. Handles file uploads to Pinata.
@@ -57,33 +58,54 @@ FRONTEND_URL=your_client_url
 PORT=4000
 ```
 
-### Run Server
+### Running Commands
 ```bash
 cd server
 npm install
 npx ts-node src/app.ts
 ```
 
-## Contracts
-Made with Solidity and deployed on Rootstock Testnet. Allows paying for uploads.
 
-**Tech Stack:** Solidity + Hardhat 
+## Client
+Made with React. Lets users select a file, preview its metadata (name, size, MIME type), and prepare for upload to IPFS.
 
-### Environment Variables (`server/.env`)
+**Tech Stack:** React + Vite + TypeScript
+
+### Features
+- File input with preview
+- File size validation (max 2 MB)
+- Disabled upload button until valid file chosen
+
+### Environment Variables (`client/.env`)
 ```bash
-PINATA_JWT=your_pinata_jwt
+VITE_API_URL=your_server_url
+VITE_CONTRACT_ADDRESS=deployed_and_verified_contract_address
+VITE_UPLOAD_PRICE=0.001
 ```
 
-# Running Commands
+### Running Commands
+
+1. Install dependencies:
 ```bash
-npx hardhat compile
-npx hardhat run scripts/deploy.ts --network rootstock_testnet
+npm install
+```
+2. Run development server:
+```bash
+npm run dev
 ```
 
-> You can verify contracts by following the instructions
-in the [Rootstock docs](https://dev.rootstock.io/developers/quickstart/remix/#verifying-the-contract-on-rootstock-explorer).
+### Steps to interact with the running app:
 
-### Project Status
+ 1. [Connect MetaMask to Rootstock testnet](https://dev.rootstock.io/dev-tools/wallets/metamask/) and pick an account with test RBTC
+ 2. Select a file (≤ 2 MB).
+ 3. Click Pay (then go through the MetaMask prompt).
+ 4. Wait for transaction to confirm (UI shows tx hash and status).
+ 5. Click Upload (enabled after payment) to POST file to server.
+ 6. Receive CID and click gateway link to view.
+
+
+
+## Project Status
 End-to-end workflow working:
 - ✅ Select file on UI
 - ✅ Pay on-chain 
