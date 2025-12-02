@@ -34,11 +34,11 @@ npx hardhat compile
 ```
 To deploy the contract to the testnet:
 ```bash
-npx hardhat run scripts/deploy.ts --network rootstock_testnet
+npx hardhat run scripts/deploy.js --network rootstock-testnet
 ```
 
 > You can verify contracts by following the instructions
-in the [Rootstock docs](https://dev.rootstock.io/developers/quickstart/remix/#verifying-the-contract-on-rootstock-explorer).
+in the [Rootstock docs](https://dev.rootstock.io/developers/quickstart/remix/#verifying-the-contract-on-rootstock-explorer). Supply the maxFee, `1000000000000000` as the constructor argument.
 
 
 ## Server
