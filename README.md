@@ -11,6 +11,12 @@ The goal is to demonstrate how **Rootstock** can enable BTC-backed payments whil
 - [x] Connect to Rootstock for BTC-backed payments
 - [x] Add wallet connection (e.g., MetaMask) 
 
+### Prerequisites
+1. Basic understanding of JavaScript, React and Node.js
+2. Node.js and npm installed
+3. Metamask wallet (See how to [configure Metamask for Rootstock](https://dev.rootstock.io/dev-tools/wallets/metamask/))
+4. Test RBTC to pay for uploads (Use the Rootstock [faucet](https://faucet.rootstock.io/) to get tRBTC)
+5. Pinata account for uploading files to IPFS (Pinata JWT and Pinata Gateway domain values are required)
 
 ## Contracts
 Made with Solidity and deployed on Rootstock Testnet. Allows paying for uploads.
@@ -57,6 +63,20 @@ PINATA_GATEWAY=your_gateway_url
 FRONTEND_URL=your_client_url
 PORT=4000
 ```
+
+You need to get your Pinata JWT with the following steps:
+1. Go to the [Pinata](app.pinata.cloud) dashboard and log in to your account. You can create a new account if you don't have one yet.
+2. Select the **"API Keys"** tab under **"Developers"** section of the left side menu.
+3. Click the "Create New Key" button to generate a new set of of API key/secret/JWT secrets. 
+4. Ensure you select at least one permission for access. It could be "Read" for "Files" for the purpose of this guide. 
+5. Copy your generated secrets and add the JWT to the `.env` file of the server app
+
+
+You need to get your Pinata gateway domain with the following steps:
+1. Go to the **"Gateways"** tab under **"IPFS"** section of the left side menu of your [Pinata](app.pinata.cloud) dashboard. 
+2. Click the **"Create"** button to create a gateway if you don't have one yet. 
+3. You will see it listed in the format `fun-llama-300.mypinata.cloud` and you have to copy it like that and add to your `.env` file.
+
 
 ### Running Commands
 ```bash
