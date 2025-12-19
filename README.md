@@ -28,16 +28,24 @@ Made with Solidity and deployed on Rootstock Testnet. Allows paying for uploads.
 - Owner-only withdrawal
 
 ### Environment Variables (`contracts/.env`)
+Add a new `.env` file to your `contracts` folder with the following key:
+
 ```bash
 PRIVATE_KEY=Your_PRIVATE_KEY
 ```
 
 ### Running Commands
 
+Intall hardhat:
+```bash
+npm install --save-dev hardhat
+```
+
 To compile the contract:
 ```bash
 npx hardhat compile
 ```
+
 To deploy the contract to the testnet:
 ```bash
 npx hardhat run scripts/deploy.js --network rootstock-testnet
@@ -45,6 +53,37 @@ npx hardhat run scripts/deploy.js --network rootstock-testnet
 
 > You can verify contracts by following the instructions
 in the [Rootstock docs](https://dev.rootstock.io/developers/quickstart/remix/#verifying-the-contract-on-rootstock-explorer). Supply the maxFee, `1000000000000000` as the constructor argument.
+
+
+## Client
+Made with React. Lets users select a file, preview its metadata (name, size, MIME type), and prepare for upload to IPFS.
+
+**Tech Stack:** React + Vite + TypeScript
+
+### Features
+- File input with preview
+- File size validation (max 2 MB)
+- Disabled upload button until valid file chosen
+
+### Environment Variables (`client/.env`)
+Create a new `.env` file in your `client` directory and add the following variables:
+
+```bash
+VITE_API_URL=your_server_url
+VITE_CONTRACT_ADDRESS=deployed_and_verified_contract_address
+VITE_UPLOAD_PRICE=0.001
+```
+
+### Running Commands
+
+1. Install dependencies:
+```bash
+npm install
+```
+2. Run development server:
+```bash
+npm run dev
+```
 
 
 ## Server
@@ -57,6 +96,8 @@ Made with Node.js and Express. Handles file uploads to Pinata.
 - Upload file buffer via Pinata SDK
 
 ### Environment Variables (`server/.env`)
+Add a new `.env` file to your `server` directory with the following variables and their values:
+
 ```bash
 PINATA_JWT=your_pinata_jwt
 PINATA_GATEWAY=your_gateway_url
@@ -79,40 +120,13 @@ You need to get your Pinata gateway domain with the following steps:
 
 
 ### Running Commands
+Run the following commands inside the `server` folder:
+
 ```bash
-cd server
 npm install
 npx ts-node src/app.ts
 ```
 
-
-## Client
-Made with React. Lets users select a file, preview its metadata (name, size, MIME type), and prepare for upload to IPFS.
-
-**Tech Stack:** React + Vite + TypeScript
-
-### Features
-- File input with preview
-- File size validation (max 2 MB)
-- Disabled upload button until valid file chosen
-
-### Environment Variables (`client/.env`)
-```bash
-VITE_API_URL=your_server_url
-VITE_CONTRACT_ADDRESS=deployed_and_verified_contract_address
-VITE_UPLOAD_PRICE=0.001
-```
-
-### Running Commands
-
-1. Install dependencies:
-```bash
-npm install
-```
-2. Run development server:
-```bash
-npm run dev
-```
 
 ### Steps to interact with the running app:
 
