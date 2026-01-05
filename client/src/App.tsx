@@ -35,13 +35,28 @@ function App() {
         return;
       }
 
+      if (!CONTRACT_ADDRESS) {
+        throw new Error("Contract address not configured");
+      }
+
+
       setError(null);
       setPaying(true);
       setPaymentConfirmed(false);
       setResult(null);
 
       const provider = new ethers.BrowserProvider(window.ethereum);
+
+      // Force MetaMask connection
+      await provider.send("eth_requestAccounts", []);
+
       const signer = await provider.getSigner();
+
+      const network = await provider.getNetwork();
+
+      if (network.chainId !== 31n) {
+        throw new Error("Please switch MetaMask to Rootstock Testnet");
+      }
 
       const contract = new ethers.Contract(
         CONTRACT_ADDRESS,
@@ -50,8 +65,12 @@ function App() {
       );
 
       const newUploadId = generateUploadId();
-      print ("newUploadId: ", newUploadId)
+      console.log("newUploadId: ", newUploadId)
       setUploadId(newUploadId);
+
+      if (!UPLOAD_PRICE) {
+        throw new Error("Upload price not configured");
+      }
 
       const value = ethers.parseEther(UPLOAD_PRICE);
 
@@ -69,9 +88,14 @@ function App() {
       } else {
         setError("Transaction failed on-chain.");
       }
-    } catch(err: any) {
-      console.error("Payment error: ", err);
-      setError("Payment failed or cancelled.");
+    } catch (err: any) {
+      console.error("Payment error:", err);
+
+      if (err?.message?.toLowerCase().includes("rejected")) {
+        setError("Transaction rejected in MetaMask");
+      } else {
+        setError(err?.message || "Payment failed");
+      }
     } finally {
       setPaying(false);
     }
@@ -137,6 +161,10 @@ function App() {
           </div>
         )}
       </div>
+
+      <div>
+        <p>Upload price: {UPLOAD_PRICE} RBTC</p>
+      </div>
       
       {/* -------- PAY BUTTON ---------- */}
       <div className="card">
@@ -169,7 +197,7 @@ function App() {
           onClick={handleUpload}
           disabled={!paymentConfirmed || uploading}
         >
-          {uploading ? "Uploading..." : "Upload to IPFS"}
+          {!paymentConfirmed ? "Pay first" : uploading ? "Uploading..." : "Upload to IPFS"}
         </button>
       </div>
       
