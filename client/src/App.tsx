@@ -65,7 +65,6 @@ function App() {
       );
 
       const newUploadId = generateUploadId();
-      console.log("newUploadId: ", newUploadId)
       setUploadId(newUploadId);
 
       if (!UPLOAD_PRICE) {
