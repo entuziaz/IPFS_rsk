@@ -238,9 +238,10 @@ function App() {
 
   return (
   <div className="app-container">
-    <h1>IPFS File Uploader</h1>
+    <h1 className="app-title">
+      <span className="title-accent">Rootstock</span> IPFS Uploader
+    </h1>
 
-    {/* Wallet */}
     <div className="wallet-card">
       {!address ? (
         <button className="primary" onClick={connectWallet}>
@@ -248,32 +249,41 @@ function App() {
         </button>
       ) : (
         <>
-          <p><strong>Address:</strong> {address.slice(0, 6)}…{address.slice(-4)}</p>
-          <p>
-            <strong>Network:</strong>{" "}
-            {chainId === ROOTSTOCK_TESTNET_CHAIN_ID ? "Rootstock Testnet" : `Wrong network (${chainId})`}
-          </p>
+          <div className="wallet-row">
+            <span className="label">Address</span>
+            <span className="value">{address.slice(0, 6)}…{address.slice(-4)}</span>
+          </div>
 
-          {/* switch network button */}
-          {address && chainId !== ROOTSTOCK_TESTNET_CHAIN_ID && (
+          <div className="wallet-row">
+            <span className="label">Network</span>
+            <span className={`value ${chainId === ROOTSTOCK_TESTNET_CHAIN_ID ? "ok" : "bad"}`}>
+              {chainId === ROOTSTOCK_TESTNET_CHAIN_ID ? "Rootstock Testnet" : "Wrong Network"}
+            </span>
+          </div>
+
+          {chainId !== ROOTSTOCK_TESTNET_CHAIN_ID && (
             <button className="secondary" onClick={switchToRootstock}>
               Switch to Rootstock Testnet
             </button>
           )}
 
-          <p><strong>Balance:</strong> {balance} RBTC</p>
+          <div className="wallet-row">
+            <span className="label">Balance</span>
+            <span className="value">{balance} RBTC</span>
+          </div>
         </>
       )}
     </div>
 
-    
-
-
     {/* File Input */}
-    <input
-      type="file"
-      onChange={(event) => setFile(event.target.files?.[0] || null)}
-    />
+    <label className="file-input">
+      <span>Choose file</span>
+      <input
+        type="file"
+        onChange={(event) => setFile(event.target.files?.[0] || null)}
+      />
+    </label>
+
 
     <p className="info">Max file size: 2MB</p>
     <p className="info">Upload price: {UPLOAD_PRICE} RBTC</p>
