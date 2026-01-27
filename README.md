@@ -4,6 +4,9 @@ A simple full-stack application that allows users to pay in **RBTC** to upload f
 The goal is to demonstrate how **Rootstock** can enable BTC-backed payments while leveraging decentralized storage for practical use cases.
 
 
+<img width="911" height="644" alt="ipfs_uploader_ui" src="https://github.com/user-attachments/assets/3e96e4ae-fd76-43c1-b8e2-c345fd4bf01f" />
+
+
 ### TODO
 - [x] Setup React client to accept file
 - [x] Connect to IPFS-Pinata upload SDK  
