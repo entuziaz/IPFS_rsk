@@ -120,14 +120,22 @@ button:disabled {
 
 /* Errors */
 .error {
-  margin-top: 10px;
+  margin-top: 16px;
   color: #f87171;
   background: rgba(248, 113, 113, 0.1);
   border: 1px solid rgba(248, 113, 113, 0.2);
-  padding: 10px;
-  border-radius: 8px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  max-width: 100%;
+
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+
   font-size: 0.9rem;
 }
+
 
 /* Success */
 .success {

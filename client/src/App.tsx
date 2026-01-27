@@ -123,7 +123,6 @@ function App() {
   };
 
 
-  
   const handlePayment = async () => {
     try {
       if (!signer || !provider) {
@@ -178,13 +177,8 @@ function App() {
         setError("Transaction failed on-chain.");
       }
     } catch (err: any) {
-      console.error("Payment error:", err);
-
-      if (err?.message?.toLowerCase().includes("rejected")) {
-        setError("Transaction rejected in MetaMask");
-      } else {
-        setError(err?.message || "Payment failed");
-      }
+      console.error("Payment error:", err); 
+      setError(normalizeError(err));
     } finally {
       setPaying(false);
     }
@@ -222,6 +216,25 @@ function App() {
       setUploading(false);
     }
   };
+
+  const normalizeError = (err: any): string => {
+    const msg = err?.message?.toLowerCase() || "";
+
+    if (msg.includes("insufficient funds")) {
+      return "Insufficient RBTC balance to pay for this transaction.";
+    }
+
+    if (msg.includes("rejected")) {
+      return "Transaction rejected in MetaMask.";
+    }
+
+    if (msg.includes("wrong network")) {
+      return "Please switch to Rootstock Testnet.";
+    }
+
+    return "Transaction failed. Please try again.";
+  };
+
 
   return (
   <div className="app-container">
