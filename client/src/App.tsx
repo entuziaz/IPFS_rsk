@@ -24,15 +24,10 @@ function App() {
   const API_URL = import.meta.env.VITE_API_URL;
   const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;
   const UPLOAD_PRICE = import.meta.env.VITE_UPLOAD_PRICE; // price in RBTC 
+  const ROOTSTOCK_TESTNET_CHAIN_ID = 31n;
 
   useEffect(() => {
     if (!window.ethereum) return;
-
-    window.ethereum.request({ method: "eth_accounts" }).then((accounts) => {
-      if (accounts.length > 0) {
-        console.warn("Wallet was already authorized — ignoring until user clicks Connect");
-      }
-    });
 
     const handleAccountsChanged = () => {
       setAddress(null);
@@ -100,6 +95,34 @@ function App() {
       setError("Wallet connection failed");
     }
   };
+
+  const switchToRootstock = async () => {
+    try {
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: "0x1f" }],
+      });
+
+      if (provider && address) {
+        const network = await provider.getNetwork();
+        const balanceWei = await provider.getBalance(address);
+
+        setChainId(network.chainId);
+        setBalance(ethers.formatEther(balanceWei));
+        setError(null);
+      }
+    } catch (err: any) {
+      console.error("Switch network error:", err);
+
+      if (err?.code === 4902) {
+        setError("Rootstock Testnet is not added to MetaMask.");
+      } else {
+        setError("Network switch failed.");
+      }
+    }
+  };
+
+
   
   const handlePayment = async () => {
     try {
@@ -111,8 +134,14 @@ function App() {
         throw new Error("Contract address not configured");
       }
 
-      if (chainId !== 31n) {
-        throw new Error("Please switch MetaMask to Rootstock Testnet");
+      if (!chainId) {
+        throw new Error("Unable to detect network. Please reconnect wallet.");
+      }
+
+      if (chainId !== ROOTSTOCK_TESTNET_CHAIN_ID) {
+        throw new Error(
+          `Wrong network detected. Please switch MetaMask to Rootstock Testnet (chainId 31).`
+        );
       }
 
       setError(null);
@@ -209,12 +238,23 @@ function App() {
           <p><strong>Address:</strong> {address.slice(0, 6)}…{address.slice(-4)}</p>
           <p>
             <strong>Network:</strong>{" "}
-            {chainId === 31n ? "Rootstock Testnet" : `Wrong network (${chainId})`}
+            {chainId === ROOTSTOCK_TESTNET_CHAIN_ID ? "Rootstock Testnet" : `Wrong network (${chainId})`}
           </p>
+
+          {/* switch network button */}
+          {address && chainId !== ROOTSTOCK_TESTNET_CHAIN_ID && (
+            <button className="secondary" onClick={switchToRootstock}>
+              Switch to Rootstock Testnet
+            </button>
+          )}
+
           <p><strong>Balance:</strong> {balance} RBTC</p>
         </>
       )}
     </div>
+
+    
+
 
     {/* File Input */}
     <input
@@ -238,7 +278,15 @@ function App() {
       <button
         className="primary"
         onClick={handlePayment}
-        disabled={!file || !address || paying || paymentConfirmed || file.size > 2 * 1024 * 1024}
+        disabled={
+          !file ||
+          !address ||
+          !chainId ||
+          chainId !== ROOTSTOCK_TESTNET_CHAIN_ID ||
+          paying ||
+          paymentConfirmed ||
+          file.size > 2 * 1024 * 1024
+        }
       >
         {paying ? "Waiting for confirmation..." : paymentConfirmed ? "Paid" : "Pay"}
       </button>
