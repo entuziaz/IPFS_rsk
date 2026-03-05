@@ -55,7 +55,7 @@ npx hardhat run scripts/deploy.js --network rootstock-testnet
 ```
 
 > You can verify contracts by following the instructions
-in the [Rootstock docs](https://dev.rootstock.io/developers/quickstart/remix/#verifying-the-contract-on-rootstock-explorer). Supply the maxFee, `1000000000000000` as the constructor argument.
+in the [Rootstock docs](https://dev.rootstock.io/developers/quickstart/remix/#verifying-the-contract-on-rootstock-explorer). Supply `10000000000000` (0.00001 RBTC) as the constructor argument.
 
 
 ## Client
@@ -74,8 +74,11 @@ Create a new `.env` file in your `client` directory and add the following variab
 ```bash
 VITE_API_URL=your_server_url
 VITE_CONTRACT_ADDRESS=deployed_and_verified_contract_address
-VITE_UPLOAD_PRICE=0.001
+VITE_UPLOAD_PRICE=0.00001
 ```
+
+> Important: `VITE_UPLOAD_PRICE` must match the contract's on-chain `uploadFee` (in RBTC), or payment will revert with `Insufficient payment`.
+> After changing any `VITE_*` variable, restart the Vite dev server (`npm run dev`) for changes to take effect.
 
 ### Running Commands
 

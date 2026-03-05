@@ -2,7 +2,7 @@ const hre = require("hardhat");
 
 async function main() {
   const PayForUpload = await hre.ethers.getContractFactory("PayForUpload");
-  const uploadFee = hre.ethers.parseEther("0.001"); // 0.001 RBTC
+  const uploadFee = hre.ethers.parseEther("0.00001");
   const contract = await PayForUpload.deploy(uploadFee);
 
   await contract.waitForDeployment();

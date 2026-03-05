@@ -7,7 +7,7 @@ describe("PayForUpload", function () {
   let contract: any;
   let owner: any;
   let user: any;
-  const uploadFee = ethers.parseEther("0.001");
+  const uploadFee = ethers.parseEther("0.00001");
 
   beforeEach(async () => {
     [owner, user] = await ethers.getSigners();
