@@ -138,6 +138,10 @@ input[type="file"] {
   margin-bottom: 8px;
 }
 
+.info p {
+  overflow-wrap: anywhere;
+}
+
 /* Buttons */
 button {
   width: 100%;

@@ -205,13 +205,16 @@ function App() {
         body: formData,
       });
 
-      if (!res.ok) throw new Error("Upload failed");
+      if (!res.ok) {
+        const payload = await res.json().catch(() => null);
+        throw new Error(payload?.error || "Upload failed");
+      }
 
       const data = await res.json();
       setResult({ cid: data.cid, url: data.url });
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError("Upload failed. Try again.");
+      setError(err?.message || "Upload failed. Try again.");
     } finally {
       setUploading(false);
     }
@@ -280,6 +283,7 @@ function App() {
       <span>Choose file</span>
       <input
         type="file"
+        accept=".png,.jpg,.jpeg,.webp,.svg,.pdf"
         onChange={(event) => setFile(event.target.files?.[0] || null)}
       />
     </label>

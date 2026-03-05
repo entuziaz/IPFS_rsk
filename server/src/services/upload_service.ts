@@ -14,7 +14,14 @@ export const pinata = new PinataSDK({
 });
 
 export async function uploadFile(file: Express.Multer.File) {
-  const allowedTypes = ["image/png", "image/jpeg", "image/jpg", "application/pdf"];
+  const allowedTypes = [
+    "image/png",
+    "image/jpeg",
+    "image/jpg",
+    "image/webp",
+    "image/svg+xml",
+    "application/pdf",
+  ];
 
   if (!allowedTypes.includes(file.mimetype)) {
     throw new Error("Unsupported file type.");

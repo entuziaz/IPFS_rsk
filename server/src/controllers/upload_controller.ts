@@ -11,6 +11,8 @@ export async function handleUpload(req: Request, res: Response) {
     res.json(result);
   } catch (err: any) {
     console.error(err);
-    res.status(500).json({ error: err.message || "Upload failed" });
+    const message = err?.message || "Upload failed";
+    const status = message === "Unsupported file type." ? 400 : 500;
+    res.status(status).json({ error: message });
   }
 }
