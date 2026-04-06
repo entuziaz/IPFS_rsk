@@ -50,6 +50,8 @@ Run the development server:
 npm run dev
 ```
 
+By default, the API listens on `http://localhost:4000`.
+
 Build TypeScript:
 
 ```bash

@@ -13,13 +13,11 @@ app.use(cors({
     allowedHeaders: ["Content-Type"],
 }));
 
-app.use(cors());
 app.use(express.json());
+app.use("/upload", uploadRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`)
 })
-
-app.use("/upload", uploadRoutes);
 
 export default app;

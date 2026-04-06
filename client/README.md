@@ -72,6 +72,8 @@ Use MetaMask on `Rootstock Testnet` with test RBTC.
 
 If the wallet is on the wrong network, payment is blocked until the user switches to chain ID `31`.
 
+The frontend dev server normally runs on `http://localhost:5173`, while the API server runs on `http://localhost:4000`.
+
 ## Supported Upload Types
 
 The UI allows:

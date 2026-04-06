@@ -130,8 +130,10 @@ Run the following commands inside the `server` folder:
 
 ```bash
 npm install
-npx ts-node src/app.ts
+npm run dev
 ```
+
+The frontend dev server normally runs on `http://localhost:5173`, while the API server runs on `http://localhost:4000`.
 
 
 ### Steps to interact with the running app:
