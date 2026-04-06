@@ -1,73 +1,91 @@
-# React + TypeScript + Vite
+# Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React frontend for the Rootstock IPFS uploader.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- React
+- TypeScript
+- Vite
+- Ethers.js
 
-## React Compiler
+## What it does
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The client lets a user:
 
-## Expanding the ESLint configuration
+- connect MetaMask
+- switch to Rootstock Testnet
+- pay the upload fee in RBTC
+- upload a supported file after payment
+- open the uploaded file from the Pinata gateway
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Environment Variables
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Create `client/.env` with:
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+VITE_API_URL=your_server_url
+VITE_CONTRACT_ADDRESS=deployed_contract_address
+VITE_UPLOAD_PRICE=0.00001
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Important:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- `VITE_UPLOAD_PRICE` must match the contract's on-chain `uploadFee`
+- after changing any `VITE_*` variable, restart the Vite dev server
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Install
+
+```bash
+npm install
 ```
+
+## Common Commands
+
+Start the dev server:
+
+```bash
+npm run dev
+```
+
+Build for production:
+
+```bash
+npm run build
+```
+
+Run lint:
+
+```bash
+npm run lint
+```
+
+Preview the production build:
+
+```bash
+npm run preview
+```
+
+## Wallet Requirements
+
+Use MetaMask on `Rootstock Testnet` with test RBTC.
+
+If the wallet is on the wrong network, payment is blocked until the user switches to chain ID `31`.
+
+## Supported Upload Types
+
+The UI allows:
+
+- `.png`
+- `.jpg`
+- `.jpeg`
+- `.webp`
+- `.svg`
+- `.pdf`
+
+Files must be `2 MB` or smaller.
+
+## Related Files
+
+- App entry: [`src/App.tsx`](/Users/jheikhei/OpenSource/IPFS_rsk/client/src/App.tsx)
+- Contract ABI: [`src/abi/PayForUpload.json`](/Users/jheikhei/OpenSource/IPFS_rsk/client/src/abi/PayForUpload.json)

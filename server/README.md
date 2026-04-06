@@ -1,0 +1,95 @@
+# Server
+
+Express API for validating uploads and sending files to Pinata/IPFS.
+
+## Stack
+
+- Node.js
+- Express
+- TypeScript
+- Multer
+- Pinata SDK
+
+## What it does
+
+The server exposes an upload endpoint that:
+
+- accepts multipart file uploads
+- validates file size and MIME type
+- uploads valid files to Pinata
+- returns the resulting CID and gateway URL
+
+## Environment Variables
+
+Create `server/.env` with:
+
+```bash
+PINATA_JWT=your_pinata_jwt
+PINATA_GATEWAY=your_gateway_domain
+FRONTEND_URL=http://localhost:5173
+PORT=4000
+```
+
+Example gateway value:
+
+```bash
+PINATA_GATEWAY=fun-llama-300.mypinata.cloud
+```
+
+## Install
+
+```bash
+npm install
+```
+
+## Common Commands
+
+Run the development server:
+
+```bash
+npm run dev
+```
+
+Build TypeScript:
+
+```bash
+npm run build
+```
+
+Run the compiled server:
+
+```bash
+npm start
+```
+
+## API
+
+Upload endpoint:
+
+```bash
+POST /upload
+```
+
+Form fields:
+
+- `file`: the uploaded file
+- `uploadId`: client-generated upload identifier
+
+## Supported Upload Types
+
+The server accepts:
+
+- `image/png`
+- `image/jpeg`
+- `image/jpg`
+- `image/webp`
+- `image/svg+xml`
+- `application/pdf`
+
+Maximum file size is `2 MB`.
+
+## Related Files
+
+- App bootstrap: [`src/app.ts`](/Users/jheikhei/OpenSource/IPFS_rsk/server/src/app.ts)
+- Upload service: [`src/services/upload_service.ts`](/Users/jheikhei/OpenSource/IPFS_rsk/server/src/services/upload_service.ts)
+- Upload controller: [`src/controllers/upload_controller.ts`](/Users/jheikhei/OpenSource/IPFS_rsk/server/src/controllers/upload_controller.ts)

@@ -1,57 +1,82 @@
-# Sample Hardhat 3 Beta Project (`node:test` and `viem`)
+# Contracts
 
-This project showcases a Hardhat 3 Beta project using the native Node.js test runner (`node:test`) and the `viem` library for Ethereum interactions.
+Smart contracts for the Rootstock IPFS uploader live in this package.
 
-To learn more about the Hardhat 3 Beta, please visit the [Getting Started guide](https://hardhat.org/docs/getting-started#getting-started-with-hardhat-3). To share your feedback, join our [Hardhat 3 Beta](https://hardhat.org/hardhat3-beta-telegram-group) Telegram group or [open an issue](https://github.com/NomicFoundation/hardhat/issues/new) in our GitHub issue tracker.
+## Stack
 
-## Project Overview
+- Solidity
+- Hardhat
+- Ethers.js
 
-This example project includes:
+## What it does
 
-- A simple Hardhat configuration file.
-- Foundry-compatible Solidity unit tests.
-- TypeScript integration tests using [`node:test`](nodejs.org/api/test.html), the new Node.js native test runner, and [`viem`](https://viem.sh/).
-- Examples demonstrating how to connect to different types of networks, including locally simulating OP mainnet.
+The `PayForUpload` contract accepts RBTC payments for uploads and lets the contract owner withdraw collected funds.
 
-## Usage
+## Network
 
-### Running Tests
+This project is configured for `Rootstock Testnet`, not Sepolia.
 
-To run all the tests in the project, execute the following command:
+Configured network:
 
-```shell
-npx hardhat test
+- `rootstock-testnet`
+- RPC URL: `https://public-node.testnet.rsk.co`
+- Chain ID: `31`
+
+See [`hardhat.config.js`](/Users/jheikhei/OpenSource/IPFS_rsk/contracts/hardhat.config.js).
+
+## Environment Variables
+
+Create `contracts/.env` with:
+
+```bash
+PRIVATE_KEY=your_wallet_private_key
 ```
 
-You can also selectively run the Solidity or `node:test` tests:
+## Install
 
-```shell
-npx hardhat test solidity
-npx hardhat test nodejs
+```bash
+npm install
 ```
 
-### Make a deployment to Sepolia
+## Common Commands
 
-This project includes an example Ignition module to deploy the contract. You can deploy this module to a locally simulated chain or to Sepolia.
+Compile the contract:
 
-To run the deployment to a local chain:
-
-```shell
-npx hardhat ignition deploy ignition/modules/Counter.ts
+```bash
+npx hardhat compile
 ```
 
-To run the deployment to Sepolia, you need an account with funds to send the transaction. The provided Hardhat configuration includes a Configuration Variable called `SEPOLIA_PRIVATE_KEY`, which you can use to set the private key of the account you want to use.
+Run tests:
 
-You can set the `SEPOLIA_PRIVATE_KEY` variable using the `hardhat-keystore` plugin or by setting it as an environment variable.
-
-To set the `SEPOLIA_PRIVATE_KEY` config variable using `hardhat-keystore`:
-
-```shell
-npx hardhat keystore set SEPOLIA_PRIVATE_KEY
+```bash
+npm test
 ```
 
-After setting the variable, you can run the deployment with the Sepolia network:
+Deploy to Rootstock Testnet:
 
-```shell
-npx hardhat ignition deploy --network sepolia ignition/modules/Counter.ts
+```bash
+npx hardhat run scripts/deploy.js --network rootstock-testnet
 ```
+
+## Deployment
+
+The deploy script sets the upload fee to `0.00001` RBTC.
+
+See [`scripts/deploy.js`](/Users/jheikhei/OpenSource/IPFS_rsk/contracts/scripts/deploy.js).
+
+When verifying the deployed contract, use constructor argument:
+
+```bash
+10000000000000
+```
+
+That value is `0.00001` RBTC in wei.
+
+## Contract Summary
+
+The main contract is [`contracts/PayForUpload.sol`](/Users/jheikhei/OpenSource/IPFS_rsk/contracts/contracts/PayForUpload.sol).
+
+Key behavior:
+
+- `payForUpload(bytes32 uploadId)` accepts payments at or above `uploadFee`
+- `withdraw()` can only be called by the owner
