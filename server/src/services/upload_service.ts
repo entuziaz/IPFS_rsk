@@ -28,10 +28,33 @@ export async function uploadFile(file: Express.Multer.File) {
   }
 
   const blob = new Blob([new Uint8Array(file.buffer)], { type: file.mimetype });
+  let result;
 
-  const result = await pinata.upload.public.file(blob as unknown as File, {
-    metadata: { name: file.originalname },
-  });
+  try {
+    result = await pinata.upload.public.file(blob as unknown as File, {
+      metadata: { name: file.originalname },
+    });
+  } catch (err: any) {
+    const statusCode = err?.statusCode;
+    const details = err?.details;
+
+    console.error("Pinata upload failed", {
+      statusCode,
+      details,
+      fileName: file.originalname,
+      mimeType: file.mimetype,
+      gatewayConfigured: Boolean(process.env.PINATA_GATEWAY),
+      jwtConfigured: Boolean(process.env.PINATA_JWT),
+    });
+
+    if (!statusCode) {
+      throw new Error(
+        "Pinata upload failed before receiving a response. Check internet access and verify PINATA_JWT and PINATA_GATEWAY in server/.env."
+      );
+    }
+
+    throw new Error(`Pinata upload failed (${statusCode}). Check server configuration.`);
+  }
 
   return {
     cid: result.cid,

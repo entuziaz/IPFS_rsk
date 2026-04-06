@@ -47,7 +47,7 @@ npm install
 Run the development server:
 
 ```bash
-npm run dev
+npx ts-node src/app.ts
 ```
 
 By default, the API listens on `http://localhost:4000`.

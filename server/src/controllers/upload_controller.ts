@@ -10,7 +10,7 @@ export async function handleUpload(req: Request, res: Response) {
     const result = await uploadFile(req.file);
     res.json(result);
   } catch (err: any) {
-    console.error(err);
+    console.error("Upload controller error:", err);
     const message = err?.message || "Upload failed";
     const status = message === "Unsupported file type." ? 400 : 500;
     res.status(status).json({ error: message });
