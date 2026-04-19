@@ -19,6 +19,7 @@ The server exposes an upload endpoint that:
 - verifies the payer's wallet signature
 - verifies the matching on-chain `Paid` event on Rootstock
 - redeems each payment proof only once
+- throttles upload attempts per client IP
 - uploads valid files to Pinata
 - returns the resulting CID and gateway URL
 
@@ -33,6 +34,9 @@ FRONTEND_URL=http://localhost:5173
 ROOTSTOCK_RPC_URL=https://public-node.testnet.rsk.co
 CONTRACT_ADDRESS=your_deployed_contract_address
 MIN_CONFIRMATIONS=1
+UPLOAD_RATE_LIMIT_WINDOW_MS=60000
+UPLOAD_RATE_LIMIT_MAX_REQUESTS=5
+TRUST_PROXY=loopback
 PORT=4000
 ```
 
@@ -77,6 +81,8 @@ Upload endpoint:
 ```bash
 POST /upload
 ```
+
+By default, the server allows `5` upload attempts per IP every `60` seconds and returns `429 Too Many Requests` with `Retry-After` when the limit is exceeded.
 
 Form fields:
 

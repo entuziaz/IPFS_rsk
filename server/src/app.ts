@@ -2,10 +2,14 @@ import express from "express";
 import cors from "cors";
 import uploadRoutes from "./routes/upload_route";
 import dotenv from 'dotenv'
+import { uploadRateLimit } from "./middleware/upload_rate_limit";
 
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
+const TRUST_PROXY = process.env.TRUST_PROXY || "loopback";
+
+app.set("trust proxy", TRUST_PROXY);
 
 app.use(cors({
     origin: process.env.FRONTEND_URL || "http://localhost:5173",
@@ -14,7 +18,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
-app.use("/upload", uploadRoutes);
+app.use("/upload", uploadRateLimit, uploadRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`)
