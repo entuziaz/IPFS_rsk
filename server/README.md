@@ -15,11 +15,12 @@ Express API for validating uploads and sending files to Pinata/IPFS.
 The server exposes an upload endpoint that:
 
 - accepts multipart file uploads
-- validates file size and MIME type
+- validates file size and inspects file bytes to confirm type
 - verifies the payer's wallet signature
 - verifies the matching on-chain `Paid` event on Rootstock
 - redeems each payment proof only once
 - throttles upload attempts per client IP
+- sends baseline security headers with Helmet
 - uploads valid files to Pinata
 - returns the resulting CID and gateway URL
 
@@ -98,9 +99,7 @@ The server accepts:
 
 - `image/png`
 - `image/jpeg`
-- `image/jpg`
 - `image/webp`
-- `image/svg+xml`
 - `application/pdf`
 
 Maximum file size is `2 MB`.

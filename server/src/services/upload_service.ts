@@ -13,21 +13,46 @@ export const pinata = new PinataSDK({
   pinataGateway: process.env.PINATA_GATEWAY!,
 });
 
-export async function uploadFile(file: Express.Multer.File) {
-  const allowedTypes = [
-    "image/png",
-    "image/jpeg",
-    "image/jpg",
-    "image/webp",
-    "image/svg+xml",
-    "application/pdf",
-  ];
-
-  if (!allowedTypes.includes(file.mimetype)) {
-    throw new Error("Unsupported file type.");
+function startsWithBytes(buffer: Buffer, signature: number[]) {
+  if (buffer.length < signature.length) {
+    return false;
   }
 
-  const blob = new Blob([new Uint8Array(file.buffer)], { type: file.mimetype });
+  return signature.every((byte, index) => buffer[index] === byte);
+}
+
+function detectFileType(buffer: Buffer) {
+  if (startsWithBytes(buffer, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) {
+    return "image/png";
+  }
+
+  if (startsWithBytes(buffer, [0xff, 0xd8, 0xff])) {
+    return "image/jpeg";
+  }
+
+  if (
+    buffer.length >= 12 &&
+    buffer.subarray(0, 4).toString("ascii") === "RIFF" &&
+    buffer.subarray(8, 12).toString("ascii") === "WEBP"
+  ) {
+    return "image/webp";
+  }
+
+  if (buffer.subarray(0, 5).toString("ascii") === "%PDF-") {
+    return "application/pdf";
+  }
+
+  return null;
+}
+
+export async function uploadFile(file: Express.Multer.File) {
+  const detectedMimeType = detectFileType(file.buffer);
+
+  if (!detectedMimeType) {
+    throw new Error("Unsupported or invalid file type.");
+  }
+
+  const blob = new Blob([new Uint8Array(file.buffer)], { type: detectedMimeType });
   let result;
 
   try {
@@ -43,6 +68,7 @@ export async function uploadFile(file: Express.Multer.File) {
       details,
       fileName: file.originalname,
       mimeType: file.mimetype,
+      detectedMimeType,
       gatewayConfigured: Boolean(process.env.PINATA_GATEWAY),
       jwtConfigured: Boolean(process.env.PINATA_JWT),
     });

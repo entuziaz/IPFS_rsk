@@ -67,6 +67,7 @@ Made with React. Lets users select a file, preview its metadata (name, size, MIM
 - File input with preview
 - File size validation (max 2 MB)
 - Disabled upload button until valid file chosen
+- Upload types restricted to byte-verified PNG, JPEG, WebP, and PDF
 
 ### Environment Variables (`client/.env`)
 Create a new `.env` file in your `client` directory and add the following variables:
@@ -98,7 +99,7 @@ Made with Node.js and Express. Handles file uploads to Pinata.
 **Tech Stack:** Node.js + Express + Pinata SDK + Multer (multipart parser) + TypeScript
 
 ### Features
-- File validation: MIME type + max size (2MB)
+- File validation: magic-byte inspection + max size (2MB)
 - Upload file buffer via Pinata SDK
 
 ### Environment Variables (`server/.env`)

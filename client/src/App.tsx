@@ -313,7 +313,7 @@ function App() {
       <span>Choose file</span>
       <input
         type="file"
-        accept=".png,.jpg,.jpeg,.webp,.svg,.pdf"
+        accept=".png,.jpg,.jpeg,.webp,.pdf"
         onChange={(event) => setFile(event.target.files?.[0] || null)}
       />
     </label>

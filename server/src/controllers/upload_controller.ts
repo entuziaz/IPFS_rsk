@@ -44,7 +44,7 @@ export async function handleUpload(req: Request, res: Response) {
     const status =
       err instanceof UploadVerificationError
         ? err.status
-        : message === "Unsupported file type."
+        : message === "Unsupported or invalid file type."
           ? 400
           : 500;
     res.status(status).json({ error: message });

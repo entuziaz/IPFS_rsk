@@ -82,7 +82,6 @@ The UI allows:
 - `.jpg`
 - `.jpeg`
 - `.webp`
-- `.svg`
 - `.pdf`
 
 Files must be `2 MB` or smaller.
