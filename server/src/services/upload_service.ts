@@ -74,12 +74,10 @@ export async function uploadFile(file: Express.Multer.File) {
     });
 
     if (!statusCode) {
-      throw new Error(
-        "Pinata upload failed before receiving a response. Check internet access and verify PINATA_JWT and PINATA_GATEWAY in server/.env."
-      );
+      throw new Error("Storage service upload failed.");
     }
 
-    throw new Error(`Pinata upload failed (${statusCode}). Check server configuration.`);
+    throw new Error("Storage service upload failed.");
   }
 
   return {

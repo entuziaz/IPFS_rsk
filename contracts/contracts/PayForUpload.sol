@@ -2,7 +2,7 @@
 pragma solidity ^0.8.25;
 
 contract PayForUpload {
-    address public owner;
+    address public immutable owner;
     uint256 public uploadFee; // optional: fixed price per upload
 
     event Paid(address indexed payer, uint256 amount, bytes32 indexed uploadId, uint256 timestamp);
