@@ -19,6 +19,7 @@ contract PayForUpload {
 
     function withdraw() external {
         require(msg.sender == owner, "Only owner");
-        payable(owner).transfer(address(this).balance);
+        (bool success, ) = payable(owner).call{value: address(this).balance}("");
+        require(success, "Withdrawal failed");
     }
 }

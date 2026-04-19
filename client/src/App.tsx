@@ -11,9 +11,24 @@ function buildUploadAuthorizationMessage(uploadId: string, txHash: string) {
   ].join("\n");
 }
 
+function parseUploadPrice(uploadPrice: string | undefined) {
+  if (!uploadPrice || uploadPrice.trim() === "") {
+    throw new Error("Upload price not configured");
+  }
+
+  const normalizedPrice = uploadPrice.trim();
+
+  if (!/^\d+(\.\d+)?$/.test(normalizedPrice)) {
+    throw new Error("Upload price is invalid. Check VITE_UPLOAD_PRICE.");
+  }
+
+  return ethers.parseEther(normalizedPrice);
+}
+
 function App() {
 
   const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState<{ cid: string; url: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -33,6 +48,18 @@ function App() {
   const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;
   const UPLOAD_PRICE = import.meta.env.VITE_UPLOAD_PRICE; // price in RBTC 
   const ROOTSTOCK_TESTNET_CHAIN_ID = 31n;
+  const MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024;
+  const ROOTSTOCK_TESTNET_PARAMS = {
+    chainId: "0x1f",
+    chainName: "Rootstock Testnet",
+    nativeCurrency: {
+      name: "tRBTC",
+      symbol: "tRBTC",
+      decimals: 18,
+    },
+    rpcUrls: ["https://public-node.testnet.rsk.co"],
+    blockExplorerUrls: ["https://explorer.testnet.rootstock.io/"],
+  };
 
   useEffect(() => {
     const ethereum = window.ethereum;
@@ -66,6 +93,24 @@ function App() {
     size < 1024 * 1024
       ? (size / 1024).toFixed(2) + " KB"
       : (size / (1024 * 1024)).toFixed(2) + " MB";
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0] || null;
+
+    setFile(selectedFile);
+
+    if (!selectedFile) {
+      setFileError(null);
+      return;
+    }
+
+    if (selectedFile.size > MAX_FILE_SIZE_BYTES) {
+      setFileError("File is too large. Please choose a file smaller than 2 MB.");
+      return;
+    }
+
+    setFileError(null);
+  };
 
   function generateUploadId() {
     const randomBytes = crypto.getRandomValues(new Uint8Array(32));
@@ -133,7 +178,34 @@ function App() {
       console.error("Switch network error:", err);
 
       if (err?.code === 4902) {
-        setError("Rootstock Testnet is not added to MetaMask.");
+        try {
+          const ethereum = window.ethereum;
+
+          if (!ethereum) {
+            throw new Error("MetaMask not detected");
+          }
+
+          await ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [ROOTSTOCK_TESTNET_PARAMS],
+          });
+
+          const provider = new ethers.BrowserProvider(ethereum);
+          const signer = await provider.getSigner();
+          const signerAddress = await signer.getAddress();
+          const network = await provider.getNetwork();
+          const balanceWei = await provider.getBalance(signerAddress);
+
+          setProvider(provider);
+          setSigner(signer);
+          setAddress(signerAddress);
+          setChainId(network.chainId);
+          setBalance(ethers.formatEther(balanceWei));
+          setError(null);
+        } catch (addChainErr) {
+          console.error("Add network error:", addChainErr);
+          setError("Failed to add Rootstock Testnet to MetaMask.");
+        }
       } else {
         setError("Network switch failed.");
       }
@@ -175,11 +247,7 @@ function App() {
       const newUploadId = generateUploadId();
       setUploadId(newUploadId);
 
-      if (!UPLOAD_PRICE) {
-        throw new Error("Upload price not configured");
-      }
-
-      const value = ethers.parseEther(UPLOAD_PRICE);
+      const value = parseUploadPrice(UPLOAD_PRICE);
 
       const tx = await contract.payForUpload(newUploadId, {
         value: value
@@ -265,6 +333,14 @@ function App() {
       return "Please switch to Rootstock Testnet.";
     }
 
+    if (msg.includes("upload price is invalid")) {
+      return "Upload price is invalid. Check the app configuration.";
+    }
+
+    if (msg.includes("upload price not configured")) {
+      return "Upload price is not configured. Check the app configuration.";
+    }
+
     return "Transaction failed. Please try again.";
   };
 
@@ -314,7 +390,7 @@ function App() {
       <input
         type="file"
         accept=".png,.jpg,.jpeg,.webp,.pdf"
-        onChange={(event) => setFile(event.target.files?.[0] || null)}
+        onChange={handleFileChange}
       />
     </label>
 
@@ -330,6 +406,8 @@ function App() {
       </div>
     )}
 
+    {fileError && <div className="error">{fileError}</div>}
+
     {/* Pay */}
     <div className="section">
       <button
@@ -342,7 +420,7 @@ function App() {
           chainId !== ROOTSTOCK_TESTNET_CHAIN_ID ||
           paying ||
           paymentConfirmed ||
-          file.size > 2 * 1024 * 1024
+          file.size > MAX_FILE_SIZE_BYTES
         }
       >
         {paying ? "Waiting for confirmation..." : paymentConfirmed ? "Paid" : "Pay"}
