@@ -3,6 +3,14 @@ import { ethers } from 'ethers';
 import abi from "./abi/PayForUpload.json";
 import './App.css';
 
+function buildUploadAuthorizationMessage(uploadId: string, txHash: string) {
+  return [
+    "Authorize IPFS upload",
+    `Upload ID: ${uploadId}`,
+    `Transaction Hash: ${txHash}`,
+  ].join("\n");
+}
+
 function App() {
 
   const [file, setFile] = useState<File | null>(null);
@@ -27,7 +35,9 @@ function App() {
   const ROOTSTOCK_TESTNET_CHAIN_ID = 31n;
 
   useEffect(() => {
-    if (!window.ethereum) return;
+    const ethereum = window.ethereum;
+
+    if (!ethereum) return;
 
     const handleAccountsChanged = () => {
       setAddress(null);
@@ -43,12 +53,12 @@ function App() {
       window.location.reload();
     };
 
-    window.ethereum.on("accountsChanged", handleAccountsChanged);
-    window.ethereum.on("chainChanged", handleChainChanged);
+    ethereum.on("accountsChanged", handleAccountsChanged);
+    ethereum.on("chainChanged", handleChainChanged);
 
     return () => {
-      window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
-      window.ethereum.removeListener("chainChanged", handleChainChanged);
+      ethereum.removeListener("accountsChanged", handleAccountsChanged);
+      ethereum.removeListener("chainChanged", handleChainChanged);
     };
   }, []);
 
@@ -64,20 +74,22 @@ function App() {
 
   const connectWallet = async () => {
     try {
-      if (!window.ethereum) {
+      const ethereum = window.ethereum;
+
+      if (!ethereum) {
         setError("MetaMask not detected");
         return;
       }
 
-      const accounts = await window.ethereum.request({
+      const accounts = await ethereum.request({
         method: "eth_requestAccounts",
       });
 
-      if (!accounts || accounts.length === 0) {
+      if (!Array.isArray(accounts) || accounts.length === 0 || typeof accounts[0] !== "string") {
         throw new Error("No account selected");
       }
 
-      const provider = new ethers.BrowserProvider(window.ethereum);
+      const provider = new ethers.BrowserProvider(ethereum);
       const signer = await provider.getSigner();
 
       const address = accounts[0];
@@ -98,7 +110,13 @@ function App() {
 
   const switchToRootstock = async () => {
     try {
-      await window.ethereum.request({
+      const ethereum = window.ethereum;
+
+      if (!ethereum) {
+        throw new Error("MetaMask not detected");
+      }
+
+      await ethereum.request({
         method: "wallet_switchEthereumChain",
         params: [{ chainId: "0x1f" }],
       });
@@ -186,8 +204,13 @@ function App() {
 
   const handleUpload = async () => {
     if (!file) return;
-    if (!paymentConfirmed || !uploadId) {
+    if (!paymentConfirmed || !uploadId || !txHash) {
       setError("Payment required before upload");
+      return;
+    }
+
+    if (!signer || !address) {
+      setError("Reconnect your wallet before uploading.");
       return;
     }
 
@@ -196,9 +219,16 @@ function App() {
     setResult(null);
 
     try {
+      const signature = await signer.signMessage(
+        buildUploadAuthorizationMessage(uploadId, txHash)
+      );
+
       const formData = new FormData();
       formData.append("file", file);
       formData.append("uploadId", uploadId);
+      formData.append("txHash", txHash);
+      formData.append("walletAddress", address);
+      formData.append("signature", signature);
 
       const res = await fetch(`${API_URL}/upload`, {
         method: "POST",

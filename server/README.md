@@ -16,6 +16,9 @@ The server exposes an upload endpoint that:
 
 - accepts multipart file uploads
 - validates file size and MIME type
+- verifies the payer's wallet signature
+- verifies the matching on-chain `Paid` event on Rootstock
+- redeems each payment proof only once
 - uploads valid files to Pinata
 - returns the resulting CID and gateway URL
 
@@ -27,6 +30,9 @@ Create `server/.env` with:
 PINATA_JWT=your_pinata_jwt
 PINATA_GATEWAY=your_gateway_domain
 FRONTEND_URL=http://localhost:5173
+ROOTSTOCK_RPC_URL=https://public-node.testnet.rsk.co
+CONTRACT_ADDRESS=your_deployed_contract_address
+MIN_CONFIRMATIONS=1
 PORT=4000
 ```
 
@@ -76,6 +82,9 @@ Form fields:
 
 - `file`: the uploaded file
 - `uploadId`: client-generated upload identifier
+- `txHash`: transaction hash returned by `payForUpload`
+- `walletAddress`: address that submitted the payment transaction
+- `signature`: signature over the upload authorization message
 
 ## Supported Upload Types
 
