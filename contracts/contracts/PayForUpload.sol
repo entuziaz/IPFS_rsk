@@ -4,10 +4,13 @@ pragma solidity 0.8.28;
 /// @title PayForUpload
 /// @notice Accepts RBTC payments for upload identifiers and lets the owner withdraw collected funds.
 contract PayForUpload {
-    address public immutable owner;
+    address public owner;
+    address public pendingOwner;
     uint256 public uploadFee; // optional: fixed price per upload
 
     event Paid(address indexed payer, uint256 amount, bytes32 indexed uploadId, uint256 timestamp);
+    event OwnershipTransferStarted(address indexed previousOwner, address indexed newOwner);
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     /// @notice Deploys the contract and sets the fixed upload fee.
     /// @param _uploadFee The minimum RBTC amount required for a single upload payment.
@@ -21,6 +24,38 @@ contract PayForUpload {
     function payForUpload(bytes32 uploadId) external payable {
         require(msg.value >= uploadFee, "Insufficient payment");
         emit Paid(msg.sender, msg.value, uploadId, block.timestamp);
+    }
+
+    /// @notice Rejects direct RBTC transfers that do not go through payForUpload.
+    receive() external payable {
+        revert("Use payForUpload");
+    }
+
+    /// @notice Rejects unknown calls and accidental direct RBTC transfers.
+    fallback() external payable {
+        revert("Use payForUpload");
+    }
+
+    /// @notice Starts a two-step ownership transfer to a new owner.
+    /// @param newOwner The address that must call acceptOwnership to complete the transfer.
+    function transferOwnership(address newOwner) external {
+        require(msg.sender == owner, "Only owner");
+        require(newOwner != address(0), "Invalid owner");
+        require(newOwner != owner, "Already owner");
+
+        pendingOwner = newOwner;
+        emit OwnershipTransferStarted(owner, newOwner);
+    }
+
+    /// @notice Accepts a pending ownership transfer.
+    function acceptOwnership() external {
+        require(msg.sender == pendingOwner, "Only pending owner");
+
+        address previousOwner = owner;
+        owner = pendingOwner;
+        pendingOwner = address(0);
+
+        emit OwnershipTransferred(previousOwner, owner);
     }
 
     /// @notice Withdraws the full contract balance to the owner address.

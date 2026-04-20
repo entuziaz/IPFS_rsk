@@ -7,16 +7,18 @@ describe("PayForUpload", function () {
   let contract: any;
   let owner: any;
   let user: any;
+  let otherUser: any;
   const uploadFee = ethers.parseEther("0.00001");
 
   beforeEach(async () => {
-    [owner, user] = await ethers.getSigners();
+    [owner, user, otherUser] = await ethers.getSigners();
     const PayForUpload = await ethers.getContractFactory("PayForUpload");
     contract = await PayForUpload.deploy(uploadFee);
   });
 
   it("sets owner and uploadFee correctly", async () => {
     expect(await contract.owner()).to.equal(owner.address);
+    expect(await contract.pendingOwner()).to.equal(ethers.ZeroAddress);
     expect(await contract.uploadFee()).to.equal(uploadFee);
   });
 
@@ -26,6 +28,15 @@ describe("PayForUpload", function () {
     await expect(
       contract.connect(user).payForUpload(uploadId, { value: 0 })
     ).to.be.revertedWith("Insufficient payment");
+  });
+
+  it("rejects direct RBTC transfers", async () => {
+    await expect(
+      user.sendTransaction({
+        to: await contract.getAddress(),
+        value: uploadFee,
+      })
+    ).to.be.revertedWith("Use payForUpload");
   });
 
   it("emits Paid event with correct data", async () => {
@@ -58,5 +69,39 @@ describe("PayForUpload", function () {
     const after = await ethers.provider.getBalance(owner.address);
 
     expect(after).to.be.gt(before);
+  });
+
+  it("starts a two-step ownership transfer", async () => {
+    await expect(contract.transferOwnership(user.address))
+      .to.emit(contract, "OwnershipTransferStarted")
+      .withArgs(owner.address, user.address);
+
+    expect(await contract.pendingOwner()).to.equal(user.address);
+    expect(await contract.owner()).to.equal(owner.address);
+  });
+
+  it("prevents non-owner from starting ownership transfer", async () => {
+    await expect(
+      contract.connect(user).transferOwnership(otherUser.address)
+    ).to.be.revertedWith("Only owner");
+  });
+
+  it("allows pending owner to accept ownership", async () => {
+    await contract.transferOwnership(user.address);
+
+    await expect(contract.connect(user).acceptOwnership())
+      .to.emit(contract, "OwnershipTransferred")
+      .withArgs(owner.address, user.address);
+
+    expect(await contract.owner()).to.equal(user.address);
+    expect(await contract.pendingOwner()).to.equal(ethers.ZeroAddress);
+  });
+
+  it("prevents non-pending owner from accepting ownership", async () => {
+    await contract.transferOwnership(user.address);
+
+    await expect(contract.connect(otherUser).acceptOwnership()).to.be.revertedWith(
+      "Only pending owner"
+    );
   });
 });
