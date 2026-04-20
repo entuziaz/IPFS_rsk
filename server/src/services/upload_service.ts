@@ -1,11 +1,28 @@
 import multer from "multer";
 import { PinataSDK } from "pinata";
 import dotenv from "dotenv";
+import { logger } from "../logger";
 
 dotenv.config();
 
+const MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024;
+const ALLOWED_DECLARED_MIME_TYPES = new Set([
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "application/pdf",
+]);
+
 export const upload = multer({
-  limits: { fileSize: 2 * 1024 * 1024 },
+  limits: { fileSize: MAX_FILE_SIZE_BYTES },
+  fileFilter: (_req, file, cb) => {
+    if (!ALLOWED_DECLARED_MIME_TYPES.has(file.mimetype)) {
+      cb(new Error("Unsupported or invalid file type."));
+      return;
+    }
+
+    cb(null, true);
+  },
 });
 
 export const pinata = new PinataSDK({
@@ -63,7 +80,7 @@ export async function uploadFile(file: Express.Multer.File) {
     const statusCode = err?.statusCode;
     const details = err?.details;
 
-    console.error("Pinata upload failed", {
+    logger.error("Pinata upload failed", {
       statusCode,
       details,
       fileName: file.originalname,
@@ -71,6 +88,7 @@ export async function uploadFile(file: Express.Multer.File) {
       detectedMimeType,
       gatewayConfigured: Boolean(process.env.PINATA_GATEWAY),
       jwtConfigured: Boolean(process.env.PINATA_JWT),
+      error: logger.serializeError(err),
     });
 
     if (!statusCode) {

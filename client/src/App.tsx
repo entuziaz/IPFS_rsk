@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import abi from "./abi/PayForUpload.json";
+import { logger } from "./logger";
 import './App.css';
 
 function buildUploadAuthorizationMessage(uploadId: string, txHash: string) {
@@ -148,7 +149,9 @@ function App() {
       setBalance(ethers.formatEther(balanceWei));
       setError(null);
     } catch (err) {
-      console.error(err);
+      logger.error("Wallet connection failed", {
+        error: logger.serializeError(err),
+      });
       setError("Wallet connection failed");
     }
   };
@@ -175,7 +178,9 @@ function App() {
         setError(null);
       }
     } catch (err: any) {
-      console.error("Switch network error:", err);
+      logger.error("Switch network error", {
+        error: logger.serializeError(err),
+      });
 
       if (err?.code === 4902) {
         try {
@@ -203,7 +208,9 @@ function App() {
           setBalance(ethers.formatEther(balanceWei));
           setError(null);
         } catch (addChainErr) {
-          console.error("Add network error:", addChainErr);
+          logger.error("Add network error", {
+            error: logger.serializeError(addChainErr),
+          });
           setError("Failed to add Rootstock Testnet to MetaMask.");
         }
       } else {
@@ -263,7 +270,9 @@ function App() {
         setError("Transaction failed on-chain.");
       }
     } catch (err: any) {
-      console.error("Payment error:", err); 
+      logger.error("Payment error", {
+        error: logger.serializeError(err),
+      });
       setError(normalizeError(err));
     } finally {
       setPaying(false);
@@ -311,7 +320,9 @@ function App() {
       const data = await res.json();
       setResult({ cid: data.cid, url: data.url });
     } catch (err: any) {
-      console.error(err);
+      logger.error("Upload failed", {
+        error: logger.serializeError(err),
+      });
       setError(err?.message || "Upload failed. Try again.");
     } finally {
       setUploading(false);

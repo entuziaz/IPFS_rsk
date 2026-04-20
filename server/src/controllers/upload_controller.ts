@@ -1,5 +1,7 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
+import multer from "multer";
 import { uploadFile } from "../services/upload_service";
+import { logger } from "../logger";
 import {
   UploadVerificationError,
   consumeReservedPayment,
@@ -39,7 +41,9 @@ export async function handleUpload(req: Request, res: Response) {
       await releaseReservedPayment(reservedPayment);
     }
 
-    console.error("Upload controller error:", err);
+    logger.error("Upload controller error", {
+      error: logger.serializeError(err),
+    });
     const message = err?.message || "Upload failed";
     const status =
       err instanceof UploadVerificationError
@@ -49,4 +53,28 @@ export async function handleUpload(req: Request, res: Response) {
           : 500;
     res.status(status).json({ error: message });
   }
+}
+
+export function handleUploadMiddlewareError(
+  err: unknown,
+  _req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  if (!err) {
+    next();
+    return;
+  }
+
+  if (err instanceof multer.MulterError && err.code === "LIMIT_FILE_SIZE") {
+    res.status(400).json({ error: "File is too large. Maximum size is 2 MB." });
+    return;
+  }
+
+  if (err instanceof Error && err.message === "Unsupported or invalid file type.") {
+    res.status(400).json({ error: err.message });
+    return;
+  }
+
+  next(err);
 }
