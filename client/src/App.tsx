@@ -324,12 +324,24 @@ function App() {
         error: logger.serializeError(err),
       });
       setError(err?.message || "Upload failed. Try again.");
+
+      // FIX L-13: Reset payment state on failure so the user isn't locked
+      // Note: In a production app, you might want to check if the txHash 
+      // can be reused, but resetting allows a clean retry.
+      setPaymentConfirmed(false);
+      setTxHash(null);
+      setUploadId(null);
+      
     } finally {
       setUploading(false);
     }
   };
 
   const normalizeError = (err: any): string => {
+    if (err?.code === 4001 || err?.info?.error?.code === 4001) {
+      return "Transaction rejected in MetaMask.";
+    }
+
     const msg = err?.message?.toLowerCase() || "";
 
     if (msg.includes("insufficient funds")) {
@@ -357,12 +369,15 @@ function App() {
 
 
   return (
-  <div className="app-container">
-    <h1 className="app-title">
-      <span className="title-accent">Rootstock</span> IPFS Uploader
-    </h1>
+  <main className="app-container">
+    <header>
+      <h1 className="app-title">
+        <span className="title-accent">Rootstock</span> IPFS Uploader
+      </h1>
+    </header>
 
-    <div className="wallet-card">
+    <section className="wallet-card" aria-labelledby="wallet-heading">
+      <h2 id="wallet-heading" className="sr-only">Wallet status</h2>
       {!address ? (
         <button className="primary" onClick={connectWallet}>
           Connect Wallet
@@ -393,86 +408,86 @@ function App() {
           </div>
         </>
       )}
-    </div>
+    </section>
 
-    {/* File Input */}
-    <label className="file-input">
-      <span>Choose file</span>
-      <input
-        type="file"
-        accept=".png,.jpg,.jpeg,.webp,.pdf"
-        onChange={handleFileChange}
-      />
-    </label>
+    <section aria-labelledby="upload-heading">
+      <h2 id="upload-heading" className="sr-only">Upload workflow</h2>
 
+      <label className="file-input">
+        <span>Choose file</span>
+        <input
+          className="file-input-control"
+          type="file"
+          accept=".png,.jpg,.jpeg,.webp,.pdf"
+          onChange={handleFileChange}
+        />
+      </label>
 
-    <p className="info">Max file size: 2MB</p>
-    <p className="info">Upload price: {UPLOAD_PRICE} RBTC</p>
+      <p className="info">Max file size: 2MB</p>
+      <p className="info">Upload price: {UPLOAD_PRICE} RBTC</p>
 
-    {file && (
-      <div className="info">
-        <p>Filename: {file.name}</p>
-        <p>File size: {formatFileSize(file.size)}</p>
-        <p>File type: {file.type}</p>
-      </div>
-    )}
+      {file && (
+        <div className="info" aria-live="polite">
+          <p>Filename: {file.name}</p>
+          <p>File size: {formatFileSize(file.size)}</p>
+          <p>File type: {file.type}</p>
+        </div>
+      )}
 
-    {fileError && <div className="error">{fileError}</div>}
+      {fileError && <div className="error" role="alert">{fileError}</div>}
 
-    {/* Pay */}
-    <div className="section">
-      <button
-        className="primary"
-        onClick={handlePayment}
-        disabled={
-          !file ||
-          !address ||
-          !chainId ||
-          chainId !== ROOTSTOCK_TESTNET_CHAIN_ID ||
-          paying ||
-          paymentConfirmed ||
-          file.size > MAX_FILE_SIZE_BYTES
-        }
-      >
-        {paying ? "Waiting for confirmation..." : paymentConfirmed ? "Paid" : "Pay"}
-      </button>
-    </div>
-
-    {/* Tx */}
-    {txHash && (
-      <div className="tx-link">
-        <a
-          href={`https://explorer.testnet.rsk.co/tx/${txHash}`}
-          target="_blank"
-          rel="noreferrer"
+      <div className="section">
+        <button
+          className="primary"
+          onClick={handlePayment}
+          disabled={
+            !file ||
+            !address ||
+            !chainId ||
+            chainId !== ROOTSTOCK_TESTNET_CHAIN_ID ||
+            paying ||
+            paymentConfirmed ||
+            file.size > MAX_FILE_SIZE_BYTES
+          }
         >
-          View Transaction
-        </a>
+          {paying ? "Waiting for confirmation..." : paymentConfirmed ? "Paid" : "Pay"}
+        </button>
       </div>
-    )}
 
-    {/* Upload */}
-    <div className="section">
-      <button
-        className="secondary"
-        onClick={handleUpload}
-        disabled={!paymentConfirmed || uploading}
-      >
-        {!paymentConfirmed ? "Pay first" : uploading ? "Uploading..." : "Upload to IPFS"}
-      </button>
-    </div>
+      {txHash && (
+        <div className="tx-link" aria-live="polite">
+          <a
+            href={`https://explorer.testnet.rsk.co/tx/${txHash}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            View Transaction
+          </a>
+        </div>
+      )}
 
-    {error && <div className="error">{error}</div>}
+      <div className="section">
+        <button
+          className="secondary"
+          onClick={handleUpload}
+          disabled={!paymentConfirmed || uploading}
+        >
+          {!paymentConfirmed ? "Pay first" : uploading ? "Uploading..." : "Upload to IPFS"}
+        </button>
+      </div>
+    </section>
+
+    {error && <div className="error" role="alert">{error}</div>}
 
     {result && (
-      <div className="success">
+      <section className="success" aria-live="polite" aria-label="Upload success">
         {/* <p>CID: {result.cid}</p> */}
         <a href={result.url} target="_blank" rel="noopener noreferrer">
           View on IPFS
         </a>
-      </div>
+      </section>
     )}
-  </div>
+  </main>
   );
 
 }
