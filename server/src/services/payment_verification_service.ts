@@ -178,22 +178,26 @@ function findPaidLog(
   logs: Array<{ address: string; topics: string[]; data: string }>,
   uploadId: string
 ) {
-  const contractAddress = normalizeAddress(
-    getRequiredEnv("CONTRACT_ADDRESS", CONTRACT_ADDRESS),
-    "CONTRACT_ADDRESS"
-  );
-  const paidEventTopic = ethers.id(PAID_EVENT_SIGNATURE);
-  const encodedUploadId = ethers.zeroPadValue(uploadId, 32).toLowerCase();
+
+  const targetContract = getRequiredEnv("CONTRACT_ADDRESS", CONTRACT_ADDRESS).toLowerCase();
+  const paidEventTopic = ethers.id("Paid(address,uint256,bytes32,uint256)").toLowerCase();
+
+  const targetUploadId = ethers.zeroPadValue(uploadId, 32).toLowerCase();
 
   return logs.find((log) => {
-    if (normalizeAddress(log.address, "contract log address") !== contractAddress) {
-      return false;
-    }
+    const logAddress = log.address.toLowerCase();
+    const eventSignature = log.topics[0]?.toLowerCase();
+    const logUploadId = log.topics[2]?.toLowerCase();
+
+    // Debugging logs (Check your console!)
+    console.log(`Checking log from: ${logAddress}`);
+    console.log(`Event Sig: ${eventSignature} vs ${paidEventTopic}`);
+    console.log(`UploadId: ${logUploadId} vs ${targetUploadId}`);
 
     return (
-      log.topics.length >= 3 &&
-      log.topics[0]?.toLowerCase() === paidEventTopic.toLowerCase() &&
-      log.topics[2]?.toLowerCase() === encodedUploadId
+      logAddress === targetContract &&
+      eventSignature === paidEventTopic &&
+      logUploadId === targetUploadId
     );
   });
 }

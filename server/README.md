@@ -32,7 +32,7 @@ Create `server/.env` with:
 PINATA_JWT=your_pinata_jwt
 PINATA_GATEWAY=your_gateway_domain
 FRONTEND_URL=http://localhost:5173
-ROOTSTOCK_RPC_URL=https://public-node.testnet.rsk.co
+ROOTSTOCK_RPC_URL=your_Rootstock_RPC_URL
 CONTRACT_ADDRESS=your_deployed_contract_address
 MIN_CONFIRMATIONS=1
 UPLOAD_RATE_LIMIT_WINDOW_MS=60000
@@ -40,6 +40,8 @@ UPLOAD_RATE_LIMIT_MAX_REQUESTS=5
 TRUST_PROXY=loopback
 PORT=4000
 ```
+
+Get your Rootstock RPC URL by following the steps on [Getting Started with the Rootstock RPC API](https://dev.rootstock.io/developers/rpc-api/rootstock/setup/).
 
 Example gateway value:
 
